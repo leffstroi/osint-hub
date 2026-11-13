@@ -65,3 +65,5 @@ textarea{font-family:var(--mono);font-size:14px;resize:vertical}input:focus,sele
 .sugg{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
 details summary{cursor:pointer}
 .msg blockquote{margin:.3em 0;padding:6px 10px;border-left:3px solid var(--wa);color:var(--mu);font-size:.85rem;background:rgba(255,181,71,.05)}
+.lessons{padding-left:22px;margin:0;columns:2 240px}.lessons li{margin:4px 0;break-inside:avoid}.lessons li a{color:var(--mu)}.lessons li.ok a{color:var(--ac)}
+.coderow{display:flex;gap:8px;align-items:center;margin:8px 0}.coderow input{flex:1}

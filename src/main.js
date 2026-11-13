@@ -15,7 +15,11 @@ const tr = o => o?.[lang] ?? o?.ru ?? '';
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dirById = Object.fromEntries(DIRS.map(d=>[d.id,d]));
 let favs = new Set(store.get('oh_favs',[]));
-const isPremium = () => store.get('oh_premium',false);
+const unlocked = () => new Set(store.get('oh_unlocked',[]));
+const isUnlocked = id => unlocked().has(id);
+const sha = async c => [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(c)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function redeem(raw){ const c=raw.trim().toUpperCase(); if(!c) return null; const id=CODES[await sha(c)]; if(!id) return null; const u=unlocked(); u.add(id); store.set('oh_unlocked',[...u]); return id; }
+const lessonNo = id => DIRS.findIndex(d=>d.id===id)+1;
 
 function shell(content, active){
   const nav=[['#/',t('home'),'home'],['#/tools',t('tools'),'tools'],['#/lab',t('lab'),'lab'],['#/ai','🤖 '+L('ИИ-помощник','AI'),'ai'],['#/notebook',t('notebook'),'notebook'],['#/favorites',t('favs'),'favs'],['#/ethics',t('ethics'),'ethics'],['#/premium','⭐ '+t('premium'),'premium']];
@@ -60,8 +64,9 @@ function bindGlobalSearch(){
 function dirPage(id){
   const d=dirById[id]; if(!d) return home();
   const tl=TOOLS.filter(x=>x.dir===id), steps=tr(d.steps), tips=tr(d.tips);
-  const hint = isPremium() ? `<div class="card ok-b"><h3>🔓 ${t('hintT')}</h3><p>${esc(tr(d.hint))}</p></div>`
-   : `<div class="card lock"><h3>🔒 ${t('hintT')}</h3><p>${t('lockP')}</p><a class="btn sm" href="#/premium">⭐ ${t('unlock')}</a></div>`;
+  const hint = isUnlocked(id) ? `<div class="card ok-b"><h3>🔓 ${t('hintT')}</h3><p>${esc(tr(d.hint))}</p></div>`
+   : `<div class="card lock"><h3>🔒 ${t('hintT')} · ${L('урок','lesson')} ${lessonNo(id)}</h3><p>${L('Разбор этого урока открывается его собственным кодом доступа','This lesson’s walkthrough unlocks with its own access code')} (${L('300 с за урок','300 som per lesson')}).</p>
+     <div class="coderow"><input id="lcode" placeholder="OH${String(lessonNo(id)).padStart(2,'0')}-XXXXXX-XXXX" autocapitalize="characters" autocomplete="off"><button class="btn sm" id="lact">🔓</button></div><p id="lmsg"></p><a class="btn sm ghost" href="#/premium">⭐ ${L('Как оплатить','How to pay')}</a></div>`;
   return shell(`<p class="crumbs"><a href="#/">${t('home')}</a> / ${t('dirs')}</p><h1>${d.icon} ${esc(tr(d.title))}</h1>
   <div class="dirnav">${DIRS.map(x=>`<a class="chip ${x.id===id?'on':''}" href="#/dir/${x.id}">${x.icon} ${esc(tr(x.title))}</a>`).join('')}</div>
   <section class="card"><h3>${t('overview')}</h3><p>${esc(tr(d.overview))}</p></section>
@@ -121,21 +126,22 @@ function ethicsPage(){
 }
 
 function premiumPage(){
-  const on=isPremium();
+  const u=unlocked();
   return shell(`<h1>⭐ Premium</h1>
-  ${on?`<div class="card ok-b"><h3>✅ ${L('Premium активен','Premium active')}</h3><p>${L('Разборы и решения заданий открыты во всех направлениях.','Walkthroughs are unlocked in all directions.')}</p><button class="btn sm ghost" id="pout">${L('Выйти из Premium на этом устройстве','Remove Premium on this device')}</button></div>`:''}
-  <div class="grid two"><section class="card"><h3>${L('Что даёт Premium','What you get')}</h3><ul class="tips"><li>${L('Разборы и решения практических заданий по всем','Walkthroughs and solutions for all')} ${DIRS.length} ${t('dirsCount')}</li><li>${L('Подсказки с готовыми запросами (Overpass, дорки, CLI-команды)','Hints with ready queries (Overpass, dorks, CLI)')}</li><li>${L('Поддержка развития проекта','Support the project')}</li></ul>
-  <h3>${L('Как оплатить','How to pay')}</h3><ol class="steps"><li>${L('Переведите 300 с за каждый урок по номеру или QR-коду (MBank, O!Bank или любое приложение с ELQR).','Transfer 300 som per lesson by number or QR code (MBank, O!Bank or any ELQR app).')}</li><li>${L('Отправьте чек об оплате в Telegram: <a href="https://t.me/marszn7" target="_blank" rel="noopener noreferrer">@marszn7</a>.','Send the payment receipt on Telegram: <a href="https://t.me/marszn7" target="_blank" rel="noopener noreferrer">@marszn7</a>.')}</li><li>${L('Получите код доступа и введите его ниже.','Receive an access code and enter it below.')}</li></ol>
+  <section class="card"><h3>${L('Уроки','Lessons')} (${u.size}/${DIRS.length} ${L('открыто','unlocked')})</h3><ol class="lessons">${DIRS.map(d=>`<li class="${u.has(d.id)?'ok':''}"><a href="#/dir/${d.id}">${u.has(d.id)?'🔓':'🔒'} ${d.icon} ${esc(tr(d.title))}</a></li>`).join('')}</ol>${u.size?`<button class="btn sm ghost" id="pout">${L('Сбросить доступ на этом устройстве','Reset access on this device')}</button>`:''}</section>
+  <div class="grid two"><section class="card"><h3>${L('Что даёт Premium','What you get')}</h3><ul class="tips"><li>${L('Разбор и решение практического задания выбранного урока','Walkthrough and solution for the chosen lesson’s exercise')}</li><li>${L('Каждый урок — отдельный код: один код открывает один урок','Each lesson has its own code: one code unlocks one lesson')}</li><li>${L('Подсказки с готовыми запросами (Overpass, дорки, CLI-команды)','Hints with ready queries (Overpass, dorks, CLI)')}</li><li>${L('Поддержка развития проекта','Support the project')}</li></ul>
+  <h3>${L('Как оплатить','How to pay')}</h3><ol class="steps"><li>${L('Переведите 300 с за каждый урок по номеру или QR-коду (MBank, O!Bank или любое приложение с ELQR).','Transfer 300 som per lesson by number or QR code (MBank, O!Bank or any ELQR app).')}</li><li>${L('Отправьте чек об оплате в Telegram: <a href="https://t.me/marszn7" target="_blank" rel="noopener noreferrer">@marszn7</a>.','Send the payment receipt on Telegram: <a href="https://t.me/marszn7" target="_blank" rel="noopener noreferrer">@marszn7</a>.')}</li><li>${L('Укажите в сообщении номер или название урока — получите код доступа к этому уроку и введите его ниже.','Mention the lesson number or name — you will receive that lesson’s access code; enter it below.')}</li></ol>
   <div class="paybox"><p>${L('Цена','Price')}: <b class="ok">${L('300 с за один урок','300 som per lesson')}</b></p><p>${L('Номер','Number')}: <b class="mono">+996 507 863 440</b> <button class="btn sm ghost" id="cpn">${L('Копировать','Copy')}</button></p><p>${L('Получатель','Recipient')}: <b>Марлес М</b></p><p>MBank · O!Bank</p></div>
-  <label class="block">${L('Код доступа','Access code')}<input id="code" placeholder="AVG-XXXXXX-XXXX" autocapitalize="characters" autocomplete="off"></label><button class="btn" id="cact">🔓 ${L('Активировать','Activate')}</button><p id="cmsg"></p></section>
+  <label class="block">${L('Код доступа','Access code')}<input id="code" placeholder="OH01-XXXXXX-XXXX" autocapitalize="characters" autocomplete="off"></label><button class="btn" id="cact">🔓 ${L('Активировать','Activate')}</button><p id="cmsg"></p></section>
   <section class="card qr"><img src="${import.meta.env.BASE_URL}pay-qr.jpg" alt="QR" loading="lazy"><p class="muted">${L('QR для оплаты через O!Bank / ELQR','QR for payment via O!Bank / ELQR')}</p></section></div>`,'premium');
 }
 function bindPremium(){
   const g=id=>document.getElementById(id);
   g('cpn').onclick=()=>navigator.clipboard?.writeText('+996507863440');
-  g('pout')&&(g('pout').onclick=()=>{store.set('oh_premium',false);route();});
-  g('cact').onclick=async()=>{const c=g('code').value.trim().toUpperCase();const h=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(c)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-    if(CODES.includes(h)){store.set('oh_premium',true);g('cmsg').innerHTML=`<span class="ok">✅ ${L('Premium активирован!','Premium activated!')}</span>`;setTimeout(route,800);}else g('cmsg').innerHTML=`<span class="warn">❌ ${L('Неверный код','Invalid code')}</span>`;};
+  g('pout')&&(g('pout').onclick=()=>{if(confirm(L('Сбросить все открытые уроки на этом устройстве?','Reset all unlocked lessons on this device?'))){store.set('oh_unlocked',[]);route();}});
+  g('cact').onclick=async()=>{const id=await redeem(g('code').value);
+    if(id){const d=DIRS.find(x=>x.id===id);g('cmsg').innerHTML=`<span class="ok">✅ ${L('Открыт урок','Unlocked lesson')} ${lessonNo(id)}: ${esc(tr(d.title))}</span> <a class="btn sm" href="#/dir/${id}">→</a>`;setTimeout(route,1500);}
+    else g('cmsg').innerHTML=`<span class="warn">❌ ${L('Неверный код','Invalid code')}</span>`;};
 }
 
 function route(){
@@ -149,6 +155,8 @@ function route(){
   if(p==='tools'){renderToolList();document.getElementById('tq').addEventListener('input',e=>{filt.q=e.target.value;renderToolList();});
     document.querySelectorAll('[data-f]').forEach(s=>s.addEventListener('change',e=>{filt[s.dataset.f]=e.target.value;renderToolList();}));}
   if(p==='lab'&&a&&document.getElementById('labbody'))renderLab(a,document.getElementById('labbody'),L);
+  if(p==='dir'&&document.getElementById('lact')){const g=id=>document.getElementById(id);g('lact').onclick=async()=>{const id=await redeem(g('lcode').value);
+    if(id===a){route();}else if(id){g('lmsg').innerHTML=`<span class="ok">✅ ${L('Этот код открыл другой урок','This code unlocked another lesson')}: <a href="#/dir/${id}">${esc(tr(dirById[id].title))}</a></span>`;}else g('lmsg').innerHTML=`<span class="warn">❌ ${L('Неверный код','Invalid code')}</span>`;};}
   if(p==='notebook')bindNotebook(); if(p==='ai')bindAi(L,lang,route); if(p==='premium')bindPremium();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fav]');if(!b)return;const n=b.dataset.fav;favs.has(n)?favs.delete(n):favs.add(n);store.set('oh_favs',[...favs]);
