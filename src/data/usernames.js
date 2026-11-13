@@ -1,0 +1,16 @@
+export const SITES = [
+['GitHub','https://github.com/{u}'],['GitLab','https://gitlab.com/{u}'],['X / Twitter','https://x.com/{u}'],['Instagram','https://www.instagram.com/{u}/'],
+['TikTok','https://www.tiktok.com/@{u}'],['Telegram','https://t.me/{u}'],['YouTube','https://www.youtube.com/@{u}'],['Reddit','https://www.reddit.com/user/{u}'],
+['Facebook','https://www.facebook.com/{u}'],['VK','https://vk.com/{u}'],['Threads','https://www.threads.net/@{u}'],['Bluesky','https://bsky.app/profile/{u}.bsky.social'],
+['Pinterest','https://www.pinterest.com/{u}/'],['Twitch','https://www.twitch.tv/{u}'],['Steam','https://steamcommunity.com/id/{u}'],['Medium','https://medium.com/@{u}'],
+['DEV.to','https://dev.to/{u}'],['Habr','https://habr.com/ru/users/{u}/'],['Snapchat','https://www.snapchat.com/add/{u}'],['SoundCloud','https://soundcloud.com/{u}'],
+['Spotify','https://open.spotify.com/user/{u}'],['Behance','https://www.behance.net/{u}'],['Dribbble','https://dribbble.com/{u}'],['Flickr','https://www.flickr.com/people/{u}/'],
+['Vimeo','https://vimeo.com/{u}'],['Patreon','https://www.patreon.com/{u}'],['Linktree','https://linktr.ee/{u}'],['Keybase','https://keybase.io/{u}'],
+['HackerOne','https://hackerone.com/{u}'],['Codeforces','https://codeforces.com/profile/{u}'],['LeetCode','https://leetcode.com/u/{u}/'],['Kaggle','https://www.kaggle.com/{u}'],
+['Replit','https://replit.com/@{u}'],['npm','https://www.npmjs.com/~{u}'],['PyPI','https://pypi.org/user/{u}/'],['Docker Hub','https://hub.docker.com/u/{u}'],
+['Chess.com','https://www.chess.com/member/{u}'],['Lichess','https://lichess.org/@/{u}'],['Roblox (поиск)','https://www.roblox.com/search/users?keyword={u}'],['Duolingo','https://www.duolingo.com/profile/{u}'],
+['Last.fm','https://www.last.fm/user/{u}'],['Goodreads (поиск)','https://www.goodreads.com/search?q={u}'],['Mastodon (поиск)','https://mastodon.social/@{u}'],['Tumblr','https://{u}.tumblr.com/'],
+['WordPress','https://{u}.wordpress.com/'],['Blogger','https://{u}.blogspot.com/'],['About.me','https://about.me/{u}'],['Gravatar','https://gravatar.com/{u}'],
+['Pikabu','https://pikabu.ru/@{u}'],['OK.ru (поиск)','https://ok.ru/search?st.query={u}'],['Yandex Dzen','https://dzen.ru/{u}'],['Quora','https://www.quora.com/profile/{u}'],
+['Etsy','https://www.etsy.com/shop/{u}'],['eBay','https://www.ebay.com/usr/{u}'],['Google (точный ник)','https://www.google.com/search?q=%22{u}%22'],['Yandex (точный ник)','https://yandex.com/search/?text=%22{u}%22'],
+];
