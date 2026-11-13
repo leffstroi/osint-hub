@@ -4,6 +4,7 @@ import { DIRS } from './data/directions.js';
 import CODES from './data/codes.json';
 import { S } from './i18n.js';
 import { LAB, renderLab } from './lab.js';
+import { aiPage, bindAi } from './ai.js';
 
 const app = document.getElementById('app');
 const store = { get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)) };
@@ -17,7 +18,7 @@ let favs = new Set(store.get('oh_favs',[]));
 const isPremium = () => store.get('oh_premium',false);
 
 function shell(content, active){
-  const nav=[['#/',t('home'),'home'],['#/tools',t('tools'),'tools'],['#/lab',t('lab'),'lab'],['#/notebook',t('notebook'),'notebook'],['#/favorites',t('favs'),'favs'],['#/ethics',t('ethics'),'ethics'],['#/premium','⭐ '+t('premium'),'premium']];
+  const nav=[['#/',t('home'),'home'],['#/tools',t('tools'),'tools'],['#/lab',t('lab'),'lab'],['#/ai','🤖 '+L('ИИ-помощник','AI'),'ai'],['#/notebook',t('notebook'),'notebook'],['#/favorites',t('favs'),'favs'],['#/ethics',t('ethics'),'ethics'],['#/premium','⭐ '+t('premium'),'premium']];
   return `<header class="top"><a class="logo" href="#/"><span class="dot"></span>OSINT<b>Hub</b></a>
   <nav class="nav" id="nav">${nav.map(([h,n,k])=>`<a href="${h}" class="${active===k?'on':''}">${n}</a>`).join('')}</nav>
   <div class="tr"><button class="btn sm ghost" id="lang" aria-label="language">${lang==='ru'?'EN':'RU'}</button><button class="btn sm ghost burger" id="burger" aria-label="menu">☰</button></div></header>
@@ -36,7 +37,7 @@ function toolCard(x){
 function home(){
   const counts={};TOOLS.forEach(x=>counts[x.dir]=(counts[x.dir]||0)+1);
   return shell(`<section class="hero"><p class="kicker">// ${t('tag')}</p><h1>${t('heroT')}<span class="cursor">_</span></h1><p class="lead">${t('heroP')}</p>
-  <div class="btnrow"><a class="btn" href="#/dir/geoint">🌍 ${t('start')}</a><a class="btn ghost" href="#/lab">🧪 ${t('openLab')}</a></div>
+  <div class="btnrow"><a class="btn" href="#/dir/geoint">🌍 ${t('start')}</a><a class="btn ghost" href="#/lab">🧪 ${t('openLab')}</a><a class="btn ghost" href="#/ai">🤖 ${L('Спросить ИИ','Ask AI')}</a></div>
   <div class="stats"><div><b>${TOOLS.length}</b>${t('toolsCount')}</div><div><b>${DIRS.length}</b>${t('dirsCount')}</div><div><b>${LAB.length}</b>${t('labCount')}</div></div></section>
   <div class="searchbox"><input id="gs" type="search" placeholder="🔍 ${t('search')}" autocomplete="off"></div><div id="gsr"></div>
   <h2>${t('dirs')}</h2><div class="grid dirs">${DIRS.map(d=>`<a class="dircard" href="#/dir/${d.id}"><span class="ic">${d.icon}</span><h3>${esc(tr(d.title))}</h3><p>${esc(tr(d.overview).slice(0,120))}…</p><span class="cnt">${counts[d.id]||0} ${t('toolsCount')}</span></a>`).join('')}</div>
@@ -140,7 +141,7 @@ function bindPremium(){
 function route(){
   const h=location.hash.replace(/^#\/?/,'').split('/'); let html; const [p,a]=h;
   if(p==='dir')html=dirPage(a);else if(p==='tools')html=toolsPage();else if(p==='lab')html=labPage(a);else if(p==='notebook')html=notebookPage();
-  else if(p==='favorites')html=favPage();else if(p==='ethics')html=ethicsPage();else if(p==='premium')html=premiumPage();else html=home();
+  else if(p==='favorites')html=favPage();else if(p==='ethics')html=ethicsPage();else if(p==='premium')html=premiumPage();else if(p==='ai')html=shell(aiPage(L),'ai');else html=home();
   app.innerHTML=html; document.documentElement.lang=lang; window.scrollTo(0,0);
   document.getElementById('lang').onclick=()=>{lang=lang==='ru'?'en':'ru';store.set('oh_lang',lang);route();};
   document.getElementById('burger').onclick=()=>document.getElementById('nav').classList.toggle('open');
@@ -148,7 +149,7 @@ function route(){
   if(p==='tools'){renderToolList();document.getElementById('tq').addEventListener('input',e=>{filt.q=e.target.value;renderToolList();});
     document.querySelectorAll('[data-f]').forEach(s=>s.addEventListener('change',e=>{filt[s.dataset.f]=e.target.value;renderToolList();}));}
   if(p==='lab'&&a&&document.getElementById('labbody'))renderLab(a,document.getElementById('labbody'),L);
-  if(p==='notebook')bindNotebook(); if(p==='premium')bindPremium();
+  if(p==='notebook')bindNotebook(); if(p==='ai')bindAi(L,lang,route); if(p==='premium')bindPremium();
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fav]');if(!b)return;const n=b.dataset.fav;favs.has(n)?favs.delete(n):favs.add(n);store.set('oh_favs',[...favs]);
   document.querySelectorAll(`[data-fav="${CSS.escape(n)}"]`).forEach(x=>{x.classList.toggle('on',favs.has(n));x.textContent=favs.has(n)?'★':'☆';});});

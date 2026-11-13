@@ -55,3 +55,13 @@ textarea{font-family:var(--mono);font-size:14px;resize:vertical}input:focus,sele
 @media (max-width:860px){.btn.burger{display:inline-flex}.nav{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:var(--bg);border-bottom:1px solid var(--line);padding:8px 12px}.nav.open{display:flex}.nav a{padding:12px}
 .filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.grid.two{grid-template-columns:1fr}.grid.tools{grid-template-columns:1fr}}
 @media (max-width:420px){.wrap{padding-left:12px;padding-right:12px}.stats div{flex:1;min-width:0;padding:10px}.stats b{font-size:1.35rem}.filters{grid-template-columns:1fr}.grid.labs{grid-template-columns:1fr 1fr}.labcard{flex-direction:column;align-items:flex-start;font-size:.88rem}}
+.chat{display:flex;flex-direction:column;gap:10px;max-height:62vh;overflow-y:auto;padding:4px 0;margin:12px 0}
+.msg{border:1px solid var(--line);border-radius:14px;padding:10px 14px;max-width:92%;position:relative;font-size:.95rem;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.3)}
+.msg.model{align-self:flex-start;background:var(--card)}.msg.typing{color:var(--mu);animation:pulse 1.2s infinite}
+.msg p{margin:.4em 0}.msg h4{margin:.8em 0 .3em;color:var(--ac)}.msg ul,.msg ol{padding-left:20px;margin:.3em 0}.msg pre{background:#030806;border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;font-size:13px}.msg code{font-family:var(--mono);color:var(--ac);font-size:.88em}
+.msg blockquote,.msg>p:first-child:has(+*){}.mdl{display:block;font-family:var(--mono);font-size:.7rem;color:var(--mu);margin-top:6px}
+.aiform{display:flex;gap:8px;align-items:flex-end;position:sticky;bottom:0;background:var(--bg);padding:8px 0}.aiform textarea{flex:1;font-family:inherit;font-size:16px}
+.sugg{display:flex;gap:6px;overflow-x:auto;padding:4px 0}
+details summary{cursor:pointer}
+.msg blockquote{margin:.3em 0;padding:6px 10px;border-left:3px solid var(--wa);color:var(--mu);font-size:.85rem;background:rgba(255,181,71,.05)}
