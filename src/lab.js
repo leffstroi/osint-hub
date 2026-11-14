@@ -146,7 +146,7 @@ const toHex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).joi
 const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.trim()),c=>c.charCodeAt(0)));
 function encode(el, L){
-  el.innerHTML=`<label class="block">${L('Ввод','Input')}<textarea id="in" rows="4">Avantgarde OSINT</textarea></label>
+  el.innerHTML=`<label class="block">${L('Ввод','Input')}<textarea id="in" rows="4">Mars OSINT</textarea></label>
   <div class="btnrow">${[['b64e','Base64 →'],['b64d','← Base64'],['urle','URL →'],['urld','← URL'],['hexe','Hex →'],['hexd','← Hex'],['bin','Binary →'],['rot13','ROT13'],['rev',L('Реверс','Reverse')]].map(([k,n])=>`<button class="btn sm" data-k="${k}">${n}</button>`).join('')}</div>
   <label class="block">${L('Результат','Output')}<textarea id="out" rows="4" readonly></textarea></label>
   <h4>${L('Хэши (считаются локально)','Hashes (computed locally)')}</h4><div id="h" class="tablewrap"></div>
